@@ -63,6 +63,17 @@
 			padding: 50px;
 
 		}
+
+		p {
+			font-size: 16px;
+		}
+
+		.smalltext {
+			font-size: 12px;
+			padding-bottom:0;
+			margin-bottom: 0; 
+		}
+
 	</style>
 </head>
 <body>
@@ -72,7 +83,7 @@
 		Input a long bangla news article/text, and Songkhep will try to give you a short summary in less than 8 sentences.
 		<br/>
 		The modified combination of textrank and lexrank algorithm is still in its infancy,
-		currently cosine similarity is combined with df-idf for graph weights, I hope to try a eigenvector approach soon. 
+		currently cosine similarity is combined with df-idf for graph weights, I hope to try a eigenvector + random walks approach soon. 
 		<span style="color:#c0392b">The output may not be as good as you expect.</span>
 		<br></h3>
 		<h2>The algorithm is raw here, so no html parsing is done, please paste only plain text.
@@ -93,9 +104,10 @@
 			});
 
 
-			if(isset($_POST['article'])){
+			if(isset($_POST['article']) && isset($_POST['sent_lim']) && isset($_POST['damp'])){
 				$article = strip_tags(htmlentities($_POST['article']));
-
+				$sent_lim = $_POST['sent_lim'];
+				$damp = $_POST['damp'];
 			}
 			else{
 				$article = file_get_contents('../data/test.txt');
@@ -111,17 +123,21 @@
 
 			$sk_sentence_list = banglaStringToSentences($article,$stemmer);
 
-			$cosineSimMatrix = genCosineSimMatrix($sk_sentence_list,0.1);
+			$cosineSimMatrix = genCosineSimMatrix($sk_sentence_list,$damp);
 
 			$ranks = calcRanks($cosineSimMatrix);
 
 			$avg = array_sum($ranks) / count($ranks);
 
-			sortSentences($sk_sentence_list,$ranks);
+			$sentences = getSortedSentences($sk_sentence_list,$ranks,$avg,$sent_lim);
 
-			for($i = 0; $i <= 8 && $ranks[$i] < $avg ; $i ++){
-				echo $sk_sentence_list[$i]->getOriginal();
+
+			for($i = 0; $i < count($sentences) ; $i ++){
+				echo $sentences[$i]->getOriginal();
 			}
+
+			echo "<p style='margin-left:60%;' class='smalltext'>( Sentences Generated: ".count($sentences)." | Limit: {$sent_lim} | Damping: {$damp} )</p>";
+
 
 /*foreach($sk_sentence_list as $key => $sk_sentence){
 

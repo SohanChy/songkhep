@@ -114,9 +114,9 @@ function genCosineSimMatrix($sk_list,$cosine_threshold){
 			$cosineSimMatrix[$i][$j] = $cosineSimMatrix[$i][$j] * $csmDegrees[$i];
 			// $cosineSimMatrix[$i][$j] = round($cosineSimMatrix[$i][$j], 0, PHP_ROUND_HALF_UP);
 
-			// if($cosineSimMatrix[$i][$j] > 0 && $i!=$j){
-			// 	echo " [{$i}][{$j}] - {$csmDegrees[$i]} -> {$cosineSimMatrix[$i][$j]} <hr>";
-			// }
+/*			if($cosineSimMatrix[$i][$j] > 0 && $i!=$j){
+				echo " [{$sk_list[$i]->getOriginal()}][{$sk_list[$j]->getOriginal()}] - {$csmDegrees[$i]} -> {$cosineSimMatrix[$i][$j]} <hr>";
+			}*/
 		}
 	}
 
@@ -150,8 +150,31 @@ function calcRanks($cosineSimMatrix, $damp = 0.15){
 }
 
 
-function sortSentences(&$sk_sentence_list,&$lexRanks){
-	array_multisort($lexRanks, $sk_sentence_list);
+function getSortedSentences($sk_sentence_list,$lexRanks,$avg,$sentence_num){
+	asort($lexRanks);
+
+	$i = 0;
+	$selected_indexs = [];
+	foreach ($lexRanks as $key => $value) {
+		
+		if( $value >= ($avg/1.4)){
+			$selected_indexs[] = $key;			
+		}		
+		$i++;
+
+		if(count($selected_indexs) >= $sentence_num){
+			break;
+		}
+	}
+
+	sort($selected_indexs);
+
+	$selected_senteces = [];
+	for ($i=0; $i < count($selected_indexs); $i++) { 
+		$selected_senteces[] = $sk_sentence_list[$selected_indexs[$i]];
+	}
+
+	return $selected_senteces;
 }
 
 ?> 

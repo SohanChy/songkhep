@@ -52,6 +52,10 @@
 			outline-width: 0;
 		}
 
+		.marginleft {
+			margin-left: 55px; 
+		}
+
 		.content a{
 			font-size: 10px;
 		}
@@ -75,7 +79,7 @@
 			Input a long bangla news article/text, and Songkhep will try to give you a short summary in less than 8 sentences.
 			<br/>
 			The modified combination of textrank and lexrank algorithm is still in its infancy,
-			currently cosine similarity is combined with df-idf for graph weights, I hope to try a eigenvector approach soon. 
+			currently cosine similarity is combined with df-idf for graph weights, I hope to try a eigenvector + random walks approach soon. 
 			<span style="color:#c0392b">The output may not be as good as you expect.</span>
 			<br>
 		</h3>
@@ -86,6 +90,13 @@
 
 			<textarea placeholder="Copy paste a long bangla news article here." rows="30" 
 			name="article" type="text" id="comment_text" cols="50" class="ui-autocomplete-input" autocomplete="off" role="textbox" aria-autocomplete="list" aria-haspopup="true"></textarea>
+			<br />
+			
+			<label class="marginleft">Sentence Limit:</label>			
+			<input type="number" name="sent_lim" value="7" min="3" max="8">
+			<label>Damping:</label>
+			<input type="number" name="damp" value="0.1" min="0.1" step="0.05" max=".9">
+
 			<br />
 
 			<input class="button" type="submit" value="Submit">
