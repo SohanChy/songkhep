@@ -1,7 +1,14 @@
 <?php
 
 function banglaStringToSentences($article,$stemmer){
-	$sentences_raw = mb_split($GLOBALS["sentence_end_patterns"],$article);
+
+	// mb_regex_encoding('UTF-8');
+	// mb_internal_encoding("UTF-8"); 
+
+	$article_utf8 = mb_convert_encoding($article, 'utf-8', 'utf-8');
+
+	// $sentences_raw = mb_split($GLOBALS["sentence_end_patterns"],$article_utf8);
+	$sentences_raw = preg_split('/'.$GLOBALS["sentence_end_patterns"].'/u',$article_utf8);
 
 	$sk_sentence_list = [];
 

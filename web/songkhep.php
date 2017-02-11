@@ -94,7 +94,7 @@
 
 
 			if(isset($_POST['article'])){
-				$article = htmlspecialchars($_POST['article']);
+				$article = strip_tags(htmlentities($_POST['article']));
 
 			}
 			else{
