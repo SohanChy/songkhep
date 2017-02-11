@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Songkhep - A bangla text summarizer </title>
+	<title> Songkhep - A Bangla Text Summarization Engine </title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
 	<style>
@@ -70,7 +70,7 @@
 	</head>
 	<body>
 
-		<h2>SongKhep - A bangla text summarizer </h2>
+		<h2> Songkhep - A Bangla Text Summarization Engine </h2>
 		<h3> Author: <a href="http://sohanchy.com">Sohan Chowdhury</a> <br />
 			Input a long bangla news article/text, and Songkhep will try to give you a short summary in less than 8 sentences.
 			<br/>
