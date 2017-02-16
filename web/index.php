@@ -14,7 +14,7 @@ require("top_template.html")
 			<br />
 			
 			<label class="marginleft">সর্বোচ্চ বাক্যসংখ্যাঃ</label>			
-			<input type="number" name="sent_lim" value="5" min="3" max="8">
+			<input type="number" name="sent_lim" value="7" min="1" max="10">
 			<label>বাছাইকরণ ধ্রুবকঃ</label>
 			<input type="number" name="damp" value="0.1" min="0.1" step="0.05" max=".9">
 
