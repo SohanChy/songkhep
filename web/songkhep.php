@@ -1,168 +1,94 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title> Songkhep - A Bangla Text Summarization Engine </title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-	<style>
-		body {background: #bdc3c7;}
-
-
-		h2,h3 {margin-left: 55px;margin-right: 55px;}
-
-		textarea {
-			margin-top: 10px;
-			margin-left: 50px;
-			width: 80%;
-			height: 200px;
-			-moz-border-bottom-colors: none;
-			-moz-border-left-colors: none;
-			-moz-border-right-colors: none;
-			-moz-border-top-colors: none;
-			background: none repeat scroll 0 0 rgba(0, 0, 0, 0.07);
-			border-color: -moz-use-text-color #FFFFFF #FFFFFF -moz-use-text-color;
-			border-image: none;
-			border-radius: 6px 6px 6px 6px;
-			border-style: none solid solid none;
-			border-width: medium 1px 1px medium;
-			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12) inset;
-			color: #555555;
-			font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-			font-size: 1em;
-			line-height: 1.4em;
-			padding: 5px 8px;
-			transition: background-color 0.2s ease 0s;
-		}
-
-		.button {
-			margin-left: 40%;
-			background-color: #2980b9; /* Green */
-			border: none;
-			color: white;
-			padding: 15px 32px;
-			text-align: center;
-			text-decoration: none;
-			display: inline-block;
-			font-size: 16px;
-		}
-
-
-		textarea:focus {
-			background: none repeat scroll 0 0 #FFFFFF;
-			outline-width: 0;
-		}
-
-		.content {
-			font-family: solaimanLipi;
-			font-size: 18px;
-			font-weight: 400;
-			margin-left: 55px;
-			margin-right: 55px;
-			background-color: #ecf0f1;
-			width: 80%;
-			min-height: 50%;
-			padding: 50px;
-
-		}
-
-		p {
-			font-size: 16px;
-		}
-
-		.smalltext {
-			font-size: 12px;
-			padding-bottom:0;
-			margin-bottom: 0; 
-		}
-
-	</style>
-</head>
-<body>
-
-	<h2> Songkhep - A Bangla Text Summarization Engine </h2>
-	<h3> Author: <a href="http://sohanchy.com">Sohan Chowdhury</a> <br />
-		Input a long bangla news article/text, and Songkhep will try to give you a short summary in less than 8 sentences.
-		<br/>
-		The modified combination of textrank and lexrank algorithm is still in its infancy,
-		currently cosine similarity is combined with df-idf for graph weights, I hope to try a eigenvector + random walks approach soon. 
-		<span style="color:#c0392b">The output may not be as good as you expect.</span>
-		<br></h3>
-		<h2>The algorithm is raw here, so no html parsing is done, please paste only plain text.
-		</h2>
-		
-		<div class="content">
-			<?php
-			require('../vendor/autoload.php');
+<?php
+require('../vendor/autoload.php');
 //load datas
-			require("../data/globals.php");
+require("../data/globals.php");
 
 //load functions
-			require("../helpers/functions.php");
+require("../helpers/functions.php");
+require("../php-goose-modified-bn/link-to-article.php");
 
 //autoload
-			spl_autoload_register(function ($class) {
-				include '../classes/' . $class . '.php';
-			});
+spl_autoload_register(function ($class) {
+	include '../classes/' . $class . '.php';
+});
 
+$failed = true;
 
-			if(isset($_POST['article']) && isset($_POST['sent_lim']) && isset($_POST['damp'])){
-				$article = strip_tags(htmlentities($_POST['article']));
-				$sent_lim = $_POST['sent_lim'];
-				$damp = $_POST['damp'];
-			}
-			else{
-				$article = file_get_contents('../data/test.txt');
-			}
+if(isset($_POST['article']) && isset($_POST['sent_lim']) && isset($_POST['damp']) && strlen($_POST['article']) > 8){
+	$sent_lim = $_POST['sent_lim'];
+	$damp = $_POST['damp'];
+	$label = "সংক্ষিপ্ত ফলাফলঃ";
+
+	if (strlen($_POST['article']) <700) 
+	{
+		// && filter_var(html_entity_decode(urldecode($_POST['article'])), FILTER_VALIDATE_URL)
+		$url = html_entity_decode(urldecode($_POST['article']));
+		
+	    // $articleLink = linkToArtice($_POST['article']);
+	    // $article = $articleLink->getCleanedArticleText();
+	    // echo $articleLink->getTitle();
+
+	    // echo $url;
+	    header("Location: url-songkhep.php?url={$url}&sent_lim={$sent_lim}&damp={$damp}"); /* Redirect browser */
+		exit();
+
+	}
+	else if(strlen($_POST['article']) >=700){
+		$article = strip_tags(htmlentities($_POST['article']));
+		$failed = false;
+	}
+}
+if($failed){
+	$article = file_get_contents('../data/test.txt');
+	$sent_lim = 5;
+	$damp = 0.1;
+	$label = "আপনার দেয়া ইনপুট গ্রহণযোগ্য ছিলোনা, উদাহরণসরুপ একটি খবরের সংক্ষেপ দেয়া হলোঃ";
+
+	if( isset($_GET['failed']) ){
+		$label = $label . "<br />".$_GET['failed'];
+	}
+}
 
 // echo $article;
 
 //main code starts here
 
+$stemmer = new Stemmer("../data/stemmer.rules");
 
+$sk_sentence_list = banglaStringToSentences($article,$stemmer);
 
-			$stemmer = new Stemmer("../data/stemmer.rules");
+$cosineSimMatrix = genCosineSimMatrix($sk_sentence_list,$damp);
 
-			$sk_sentence_list = banglaStringToSentences($article,$stemmer);
+$ranks = calcRanks($cosineSimMatrix);
 
-			$cosineSimMatrix = genCosineSimMatrix($sk_sentence_list,$damp);
+$avg = array_sum($ranks) / count($ranks);
 
-			$ranks = calcRanks($cosineSimMatrix);
+$sentences = getSortedSentences($sk_sentence_list,$ranks,$avg,$sent_lim);
 
-			$avg = array_sum($ranks) / count($ranks);
+require("top_template.html");
+?>		
 
-			$sentences = getSortedSentences($sk_sentence_list,$ranks,$avg,$sent_lim);
+<div class="content">
 
+	<?php
+		echo "<h4>{$label}</h4>
+		<div class='summary'>";
 
-			for($i = 0; $i < count($sentences) ; $i ++){
-				echo $sentences[$i]->getOriginal();
-			}
-
-			echo "<p style='margin-left:60%;' class='smalltext'>( Sentences Generated: ".count($sentences)." | Limit: {$sent_lim} | Damping: {$damp} )</p>";
-
-
-/*foreach($sk_sentence_list as $key => $sk_sentence){
-
-	echo $key." -> ".$sk_sentence->getOriginal()." <br>";
-
-	if($key < count($sk_sentence_list) - 1){
-		$similarity = calcSimilarity($sk_sentence_list[$key]->getWords(),
-			$sk_sentence_list[$key+1]->getWords());
-		echo "/\\  ".$similarity."  \/";
+	for($i = 0; $i < count($sentences) ; $i ++){
+		echo $sentences[$i]->getOriginal()."<br />";
 	}
 
-	foreach ($sk_sentence->getWords() as $st_word) {
-		echo $st_word." + ";
-	}
-	echo "<br>";
-	
-}
-*/
+	echo "</div>";
 
-?> 
+echo "<p class='smalltext showInRight'>( সংক্ষেপিত বাক্যসংখ্যাঃ: ".count($sentences)." | সর্বোচ্চ বাক্যসংখ্যাঃ: {$sent_lim} | বাছাইকরণ ধ্রুবকঃ: {$damp} )</p>";
 
+	?>
 
-</div><br />
-<a class="button" href="index.php">Try Another Article</a>
+<a class="button showInRight" href="index.php">Try Another Article</a>
 
-</body>
-</html>
+</div>
+
+<?php
+require("bottom_template.html")
+?>
 

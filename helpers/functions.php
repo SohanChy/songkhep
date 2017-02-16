@@ -2,25 +2,30 @@
 
 function banglaStringToSentences($article,$stemmer){
 
-	// mb_regex_encoding('UTF-8');
-	// mb_internal_encoding("UTF-8"); 
-
 	$article_utf8 = mb_convert_encoding($article, 'utf-8', 'utf-8');
 
-	// $sentences_raw = mb_split($GLOBALS["sentence_end_patterns"],$article_utf8);
-	$sentences_raw = preg_split('/'.$GLOBALS["sentence_end_patterns"].'/u',$article_utf8);
+	$paragraphs = preg_split('/\n{2,}/',$article_utf8);
 
 	$sk_sentence_list = [];
 
-	foreach($sentences_raw as $sentence_raw) {
 
-		$sk_sentence = new SKSentence($sentence_raw,$stemmer);
+	foreach ($paragraphs as $paragraphNum => $value) {
 
-		if( $sk_sentence->isValid() ){
-			$sk_sentence_list[] = $sk_sentence;		
+		$sentences_raw = preg_split('/'.$GLOBALS["sentence_end_patterns"].'/u',$value);
+
+		foreach($sentences_raw as $sentence_raw) {
+
+			$sk_sentence = new SKSentence($sentence_raw,$stemmer,$paragraphNum);
+
+			if( $sk_sentence->isValid() ){
+				$sk_sentence_list[] = $sk_sentence;		
+			}
+
 		}
 
 	}
+	
+	
 
 	return $sk_sentence_list;
 
@@ -175,6 +180,17 @@ function getSortedSentences($sk_sentence_list,$lexRanks,$avg,$sentence_num){
 	}
 
 	return $selected_senteces;
+}
+
+function getSortedSentencesP($sk_sentence_list,$lexRanks,$avg,$sentence_num){
+
+	//Change to algorithm based on paragraph here
+	$paragraphNum = $sk_sentence_list[count($sk_sentence_list) - 1]->getParagraphNum();
+
+	if(false){
+
+	}
+	else return getSortedSentences($sk_sentence_list,$ranks,$avg,$sent_lim);
 }
 
 ?> 

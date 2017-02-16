@@ -2,12 +2,13 @@
 
 class SKSentence
 {
-	private $original,$processed,$validity,$words;
+	private $original,$processed,$validity,$words,$paragraphNum;
 
-	public function __construct($sentence,$stemmer)
+	public function __construct($sentence,$stemmer,$paragraphNum)
 	{
 		$this->original = $sentence;
 		$this->validity = $this->filterInvalidSentence($this->original);
+		$this->paragraphNum = $paragraphNum;
 
 		if($this->validity){
 			$this->processed = $this->removeStopWords($this->original);
@@ -24,6 +25,10 @@ class SKSentence
 
 
 		}
+	}
+
+	public function getParagraphNum(){
+		return $this->paragraphNum;
 	}
 
 	public function getOriginal(){

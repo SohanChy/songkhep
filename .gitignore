@@ -1,3 +1,4 @@
+*.directory
 composer.phar
 /vendor/
 

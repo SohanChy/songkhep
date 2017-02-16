@@ -1,5 +1,5 @@
 <?
-$GLOBALS["sentence_end_patterns"] = '(?<=[.?!।])';
+$GLOBALS["sentence_end_patterns"] = '(?<=(\. )|(\.\n)|[?!।])';
 //'(?<=[!?.।])';
 
 

@@ -1,0 +1,5 @@
+{
+  "require": {
+    "scotteh/php-goose": "dev-master"
+  }
+}
