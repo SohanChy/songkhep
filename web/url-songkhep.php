@@ -61,6 +61,7 @@ $avg = array_sum($ranks) / count($ranks);
 $sentences = getSortedSentences($sk_sentence_list,$ranks,$avg,$sent_lim);
 
 require("top_template.html");
+include_once("ga.php");
 
 ?>		
 

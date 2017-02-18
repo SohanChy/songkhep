@@ -1,5 +1,6 @@
 <?php
-require("top_template.html")
+require("top_template.html");
+include_once("ga.php");
 ?>
 <div class="content">
 		<p>
